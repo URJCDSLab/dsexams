@@ -1,0 +1,384 @@
+---
+title: "Regresión lineal 2"
+author: "Antonio Alonso-Ayuso"
+date: "2023-04-27"
+label: "ED2_Regresion2"
+description: "En este ejercicio se proporcionan unos datos con tres variables. Se pide calcular la media de cada una de las variables y su matriz de varianzas covarianzas. También se pide ajustar dos rectas de regresión y responder algunas preguntas al respecto."
+source: "Elaboración propia del autor de este ejercicio."
+source_doi: ""
+url: ""
+author_orcid: "0000-0002-6130-3596"
+language: "es"
+level: "exam"
+type: "cloze"
+domain:
+  - generic
+lesson:
+- descriptive statistics
+keywords:
+- bivariate analysis
+- regression
+
+version: 1
+---
+
+
+
+```{r data generation, echo = FALSE, results = "hide"}
+## data-generating process:
+## Two options: covariance zero or not zero
+## Then generate a normal distribution sample and a correlated Poisson distribution sample
+
+
+
+## Objects for solutions explanations, ...:
+questions <- solutions <- explanations <- type <- tol <- list()
+
+## Checking validity
+ok <- FALSE
+while(!ok){
+  n <- 15
+  mx <- runif(1, 800, 900)
+  my <- runif(1, 14, 28)
+  mz <- mzo <- 15
+  sx <- runif(1, 400, 500)
+  sy <- runif(1, 6, 7)
+  sz <- runif(1, 7, 8)
+  x <- round(rnorm(n, mx, sd = sx),0)
+  
+  TEMbuena <- runif(1) < 0.50
+  if (TEMbuena) {
+      rxy <- round(runif(1, -0.95, -0.80), 2)
+      rxz <- round(runif(1, -0.55, -0.40), 2)
+  }
+  if (!TEMbuena) {
+      rxz <- round(runif(1, -0.95, -0.80), 2)
+      rxy <- round(runif(1, -0.55, -0.40), 2)
+  }
+  y <- round((rxy * x/sx + rnorm(n, my/sy - rxy * mx/sx, sqrt(1 - rxy^2))) * sy,0)
+  z <- 2.5 * round((rxz * x/sx + rnorm(n, mz/sz - rxz * mx/sx, sqrt(1 - rxz^2))) * sy/2.5,0)
+
+  rxy <- cor(x, y)
+  rxz <- cor(x, z)
+  
+  if ( TEMbuena && rxy < - 0.80 && rxz > -0.50 && min(x) > 200 && min(y) > 0 && min(z) > 0){
+    ok <- TRUE
+  } 
+  if (!TEMbuena && rxy > - 0.50 && rxz < -0.80 && min(x) > 200 && min(y) > 0 && min(z) > 0) {
+    ok <- TRUE
+  }
+  
+  mx <- round(mean(x),4)
+  my <- round(mean(y),4)
+  mz <- round(mean(z),4)
+  
+  vx <- round(var(x)*14/15,4)
+  vy <- round(var(y)*14/15,4)
+  vz <- round(var(z)*14/15,4)
+  
+  cxy <- round(cov(x,y)*14/15,4)
+  cxz <- round(cov(x,z)*14/15,4)
+  cyz <- round(cov(z,y)*14/15,4)
+  
+  rxy <- round(cor(x, y), digits = 4)
+  rxz <- round(cor(x, z), digits = 4)
+  
+  
+  dat <- data.frame(x,y,z)
+  colnames(dat) <- c("CON","TEM","ESP")
+  
+  a1 <- round(cov(x,y)/var(y),4)
+  b1 <- round(mean(x)-cov(x,y)/var(y)*mean(y),4)
+  
+  a2 <- round(cov(x,z)/var(z),4)
+  b2 <- round(mean(x)-cov(x,z)/var(z)*mean(z),4)
+  
+  Y <- round(runif(1, -5, 5) + my)
+  Z <- round(sample(c(-2,-1,0,1,2),1)*2.5 + mzo,1)
+  
+  if (TEMbuena) est <- round(a1 * Y + b1,3) else est <- round(a2 * Z + b2,3)
+  if (TEMbuena) a  <- a1 else a  <- a2
+  if (TEMbuena) b  <- b1 else b  <- b2
+  if (TEMbuena) XX <- Y  else XX <- Z
+  
+  ## checking if there is any NA value 
+  if (!any(is.na(c(mx,my,mz,
+                   vx,vy,vz,
+                   cxy,cxz,cyz,
+                   a,b,est,XX)))){
+    ok <- TRUE
+  }
+
+}
+
+tol_ex <- "0.5"
+
+# pregunta 1 ----
+questions[[1]] <- "Media de CON: "
+solutions[[1]] <-  explanations[[1]] <- mx
+type[[1]] <- "num"
+tol[[1]] <- tol_ex
+
+
+# pregunta 2 ----
+questions[[2]] <- "Media de TEM: "
+solutions[[2]] <-  explanations[[2]] <- my
+type[[2]] <- "num"
+tol[[2]] <- tol_ex
+
+
+# pregunta 3 ----
+questions[[3]] <- "Media de ESP: "
+solutions[[3]] <-  explanations[[3]] <- mz
+type[[3]] <- "num"
+tol[[3]] <- tol_ex
+
+
+# pregunta 4 ----
+questions[[4]] <- " "
+solutions[[4]] <-  explanations[[4]] <- vx
+type[[4]] <- "num"
+tol[[4]] <- tol_ex
+
+
+# pregunta 5 ----
+questions[[5]] <- " "
+solutions[[5]] <-  explanations[[5]] <- vy
+type[[5]] <- "num"
+tol[[5]] <- tol_ex
+
+
+# pregunta 6 ----
+questions[[6]] <- " "
+solutions[[6]] <-  explanations[[6]] <- vz
+type[[6]] <- "num"
+tol[[6]] <- tol_ex
+
+
+# pregunta 7 ----
+questions[[7]] <- " "
+solutions[[7]] <-  explanations[[7]] <- cxy
+type[[7]] <- "num"
+tol[[7]] <- tol_ex
+
+
+# pregunta 8 ----
+questions[[8]] <- " "
+solutions[[8]] <-  explanations[[8]] <- cxz
+type[[8]] <- "num"
+tol[[8]] <- tol_ex
+
+
+# pregunta 9 ----
+questions[[9]] <- " "
+solutions[[9]] <-  explanations[[9]] <- cyz
+type[[9]] <- "num"
+tol[[9]] <- tol_ex
+
+
+# pregunta 10 ----
+questions[[10]] <- "a="
+solutions[[10]] <-  explanations[[10]] <- a1
+type[[10]] <- "num"
+tol[[10]] <- tol_ex
+
+
+# pregunta 11 ----
+questions[[11]] <- "b="
+solutions[[11]] <-  explanations[[11]] <- b1
+type[[11]] <- "num"
+tol[[11]] <- tol_ex
+
+
+# pregunta 12 ----
+questions[[12]] <- "coeficiente de correlación = "
+solutions[[12]] <-  explanations[[12]] <- rxy
+type[[12]] <- "num"
+tol[[12]] <- tol_ex
+
+
+# pregunta 13 ----
+questions[[13]] <- "a= "
+solutions[[13]] <-  explanations[[13]] <- a2
+type[[13]] <- "num"
+tol[[13]] <- tol_ex
+
+
+# pregunta 14 ----
+questions[[14]] <- "b= "
+solutions[[14]] <-  explanations[[14]] <- b2
+type[[14]] <- "num"
+tol[[14]] <- tol_ex
+
+
+# pregunta 15 ----
+questions[[15]] <- "coeficiente de correlación = "
+solutions[[15]] <-  explanations[[15]] <- rxz
+type[[15]] <- "num"
+tol[[15]] <- tol_ex
+
+
+# pregunta 16 ----
+questions[[16]] <- c("TEM","ESP")
+solutions[[16]] <- c(TEMbuena,!TEMbuena)
+type[[16]] <- "schoice"
+solutions[16] <- lapply(solutions[16], mchoice2string)
+explanations[[16]] <- c(paste0("La mejor variables es ", c("TEM","ESP")[c(TEMbuena,!TEMbuena)]),"")
+tol[[16]] <- tol_ex
+
+
+# pregunta 17 ----
+questions[[17]] <- "Consumo eléctrico: "
+solutions[[17]] <-  explanations[[17]] <- est
+type[[17]] <- "num"
+tol[[17]] <- tol_ex
+
+
+
+```
+
+
+Question
+========
+
+NOTA: la toleracia máxima admitida en las respuestas es `r tol_ex`.
+
+Se desea estudiar el consumo de combustible en calefacción de casas unifamiliares durante el mes de enero. Para ello, se seleccionan 15 viviendas y se observan las siguientes variables
+\begin{itemize}
+\item CON: consumo mensual de combustible en calefacción (en litros)
+\item TEM: Temperatura atmosférica promedio diaria (en grados centígrados)
+\item ESP: espesor de la capa de aislamiento de la vivienda (en centímetros).
+\end{itemize}
+La siguiente tabla muestra los datos observados:
+
+
+```{r, echo=FALSE}
+dat
+```
+
+
+A partir de estos datos, indique:
+
+a. Media de cada una de las variables: 
+      * ##ANSWER1##
+      * ##ANSWER2##
+      * ##ANSWER3##
+
+
+b. Matriz de varianzas/covarianzas: 
+
+
+|       | $CON$       | $TEM$       |$ESP$        |
+|-------|:-----------:|:-----------:|:-----------:|
+| $CON$ | ##ANSWER4## |             |             |
+| $TEM$ | ##ANSWER7## | ##ANSWER5## |             |
+| $ESP$ | ##ANSWER8## | ##ANSWER9## | ##ANSWER6## |
+
+
+
+
+c. Para determinar qué variable parece más relevante, obtener las dos rectas de regresión tomando como variable dependiente el consumo y como variables independientes las variables TEM y ESP, respectivamente. 
+      * Recta $CON= a * TEM + b$: ##ANSWER10##, ##ANSWER11##, ##ANSWER12##. 
+      * Recta $CON= a * ESP + b$: ##ANSWER13##, ##ANSWER14##, ##ANSWER15##. 
+
+
+A la vista de los resultados, ¿qué variable parece más adecuada para conocer el consumo de combustible en una vivienda? ##ANSWER16##.
+
+d.  Utilizando la recta de regresión asociada a la variable con mayor coeficiente de correlación, indique el consumo esperado para una vivienda con una temperatura de `r Y` grados centígrados y una capa de aislamiento de `r Z` centímetros. ##ANSWER17##.
+
+
+
+```{r questionlist, echo = FALSE, results = "asis"}
+answerlist(unlist(questions), markup = "markdown")
+```
+
+Solution
+========
+
+
+  **Explicación general:**
+
+La media se calcula como:
+$$\overline{x}=\frac{1}{n}\sum_{i=1,n} x_i$$
+
+donde $n$ es el número de observaciones de la variable y $x_i$ es cada una de las observaciones. Para la primera vaiable, $CON$, resulta:
+
+$$\begin{aligned}
+\overline{x}=\frac{1}{n}\sum_{i=1,n} x_i=\frac{`r format(sum(x),scientific=F)`}{ `r n`}= `r mx`
+\end{aligned}$$
+
+y, aplicando la misma expresión, resulta que la media de $TEM$ es  `r my`  y la de $ESP$ es `r mz`.
+
+Para calcular la matriz de varianzas/covarianzas (que es simétrica), recordamos la fórmula de la varianza:
+
+$$\begin{aligned}
+\sigma_x^2=\frac{1}{n}\sum_{i=1,n}(x_i-\overline{x})^2=\frac{\sum x_i^2}{n}-\overline{x}^2=\frac{ `r format(sum(x)^2,scientific=F)` }{`r n`}-  `r mx`^2 =`r format(vx,scientific=F)` 
+\end{aligned}$$
+
+Y la covarianza entre $x$ e $y$ es:
+
+$$\begin{aligned}
+cov(x,y)=\frac{1}{n}\sum_{i=1,n}(x_i-\overline{x})(y_i-\overline{y})=\frac{\sum x_iy_i}{n}-\overline{x}\overline{y}=\frac{`r format(sum(x*y),scientific=F) `}{ `r n`}-`r mx`*`r my`= `r format(cxy,scientific=F) `
+\end{aligned}$$
+
+Por tanto, aplicando estas expresiones, la matriz de covarianzas resulta:
+
+
+
+|       | $CON$   | $TEM$   |$ESP$   |
+|-------|:-------:|:-------:|:------:|
+| $CON$ | `r vx`  |         |        |
+| $TEM$ | `r cxy` | `r vy`  |        |
+| $ESP$ | `r cxz` | `r cyz` | `r vz` |
+
+
+
+
+La recta de regresión $CON = b + a TEM$. Los coeficientes de esta recta vienen datos por:
+
+$$\begin{aligned}
+& \hat{a} = r \cdot \frac{s_x}{s_y} = 
+`r rxy` \cdot \sqrt{\frac{ `r format(vx,scientific=F)` }{ `r format(vy,scientific=F)`}} = `r round(a1,5)`, \\
+& \hat{b} = \bar x - \hat a \cdot \bar y = 
+`r mx` - `r round(a1,5)` \cdot `r my` = `r round(b1,5)`.
+\end{aligned}$$
+
+
+El coeficiente de correlación se calcula como
+$$\begin{aligned}
+\rho_{xy}=\frac{cov(x,y)}{\sigma_x\cdot\sigma_y}=\frac{ `r cxy`}{  `r format(vx*vy,scientific=F) `}=`r rxy`
+\end{aligned}$$
+
+Y, de igual forma, la recta $CON = b + a ESP$ resulta
+
+$$CON = `r b2`+  `r a2`  ESP $$
+
+El coeficiente de correlación resulta $`r rxy`$.
+
+Por tanto, es mejor ajuste el que proporciona la variable $`r ifelse(TEMbuena,"TEM","ESP")`$, ya que tiene mejor coeficiente de correlación (su valor absoluto es más próximo a 1). Y, utilizando esta recta, el consumo que se espera con una temperatura `r Z` es:
+
+$$\widehat{CON} = `r round(b,5)` + `r round(a,5)` \cdot  `r XX` =  `r est`$$
+
+
+
+**Explicación específica:**
+
+```{r solutionlist, echo = FALSE, results = "asis"}
+answerlist(paste(unlist(explanations), ".", sep = ""), markup = "markdown")
+```
+
+Meta-information
+================
+extype: cloze
+exclozetype: `r paste(type, collapse = "|")`
+exsolution: `r paste(solutions, collapse = "|")`
+exname: ED2_Regresion2
+exsection: Estadistica Descriptiva/Datos bivariantes/1-ED2. Regresion2
+extitle: ED2_Regresion2
+extol: `r paste(tol, collapse = "|")`
+expoints: 10
+
+
+
+
+

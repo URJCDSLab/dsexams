@@ -1,0 +1,132 @@
+---
+title: "Exercise title"
+author: "Author(s) name(s)"
+date: "2022-10-11"
+label: "one-word text that identifies the exercise"
+description: "one-paragraph text that describes the exercise"
+source: "A text describing the source of the exercise if it is an adaptation, and crediting the original author"
+source_doi: "doi of the publicated source"
+url: "if no doi but there is a link"
+author_orcid: "doi of the author that creates this dsexams exercise"
+language: "two-digits code language, e.g., en"
+level: "Level of the exercise: introductory, intermediate or exam"
+type: "cloze"
+domain: 
+  - medicine
+  - biology
+lesson:
+  - probability
+keywords: 
+  - poisson
+  - exponential
+  - vaccine
+version: 1
+---
+
+# Instructions
+
+**IMPORTANT**: Delete this section when using the template.
+
+1. Change the metadata in the YAML header above. The categorization of each exercise is as follows:
+  - domain. One exercise must have at least one domain and could have more than one
+  - lesson. The typical lessons we have in data science. One exercise must have at least one lesson (tipycally only one, but can have more)
+  - keywords. One exercise can have as many keywords as needed. They can be both domain-specific keywords or data-science-related. keywords. They will be used to generate a set of random exercices matching the keywords. **The first keyword must be one of the recommended in the package dataset.**
+  - level. One of introductory, intermediate or exam.
+  - type. The type of exercise (cloze for multiple questions).
+  
+The rest of the fields are self-explanatory
+
+2. Generate random data for the exercise:
+
+  - Please consider if the random process might produce errors in the code, or impossible results, or any other issue in the exercise. In this case, change the condition in the `while` statement and within it in order to be sure that the exercise is valid.
+  - Create the random data to be used in the solutions. It is in the chunk labelled `data generation` below. Important: keep the `echo` and `results` chunk options as they are. In this template there is just a toy example.
+  - Save the solution of each question in an object named `solutions`, and the explanations for each answer in an object named `explanations`. For _cloze_ exercises, they should be a list. Please note that the solutions must be in the appropriate format according to the type of question:
+      + Value for string or num questions
+      + Sequence of 0s and 1s in choice questions
+  - Save the tolerance and type of question
+  - Randomness can also be included in the exercise statements. For example, save three options in a vector, and then select the solutions, explanations, and statements according to the randomly selectied option.
+
+3. Write de Question statement. Please be sure that you keep the heading level under `Question` with `====` 
+
+4. Include `##ANSWERn##` wherever you want the input of the student for question `n`. A text box or select list will be shown in Moodle. IMPORTANT: keep the answerlist empty for this item.
+
+5. Write the answer list. This is what will be shown in the exercise for the student to fill out. One line per answer. For numeric and character questions, just an asterisk `*`. For simple choice or multiple choice questions, the choices. It is automatically generated with the `answerlist()` function.
+
+6. Write the solutions. In addition to the explanations to each question, you can write arbitrary text and code for the explanations of the solution. Use the correct data according to the randomization, as well as the statements if they were also randomized. If the solution includes R output, set the `comment = NA` option in the chunk header. **The solutionlist must go after the general text**.
+
+7. Write the meta information. If you follow the template, most of the data is generated automatically. The `exsection` field will be the one that will be shown in Moodle as category. The `extitle` field will be shown as the title of the question.
+
+NOTE: an example with several type of questions can be found [here](https://www.r-exams.org/templates/lm3/).
+
+
+  
+  
+```{r data generation, echo = FALSE, results = "hide"}
+## data-generating process: explain what it does
+
+## Objects for solutions explanations, ...:
+questions <- solutions <- explanations <- type <- tol <- list()
+
+## Checking validity
+valid <- FALSE
+while(!valid){
+  ## code that generates data
+  a <- sample(1:10, 1)
+  
+  ## assess here if the solution is valid
+  if(a %in% 1:10){
+    valid <- TRUE
+  }
+}
+
+## QUESTION #1
+questions[[1]] <- "empty or vector of choices"
+solutions[[1]] <- "for choices, sequence of 0s and 1s; for numeric and string, the values. Use mchoice2string() for converting from a logical vector"
+explanations[[1]] <- "will be shown after each answer (for choices, one for each possible answer)"
+type[[1]] <- "mchoice, schoice, string or num"
+tol[[1]] <- "numeric tolerance (0 for strings and choices)"
+
+## QUESTION #n...
+  
+
+
+``` 
+
+
+Question
+========
+
+Here the statement of the question. You can include _in-line_ code for showing some data or options based on the data generation chunk.
+
+##ANSWER1##
+
+
+```{r questionlist, echo = FALSE, results = "asis"}
+answerlist(unlist(questions), markup = "markdown")
+```
+
+Solution
+========
+
+**General explanation:**
+
+Include here general explanations for the whole exercise.
+
+**Specific explanations:**
+
+
+```{r solutionlist, echo = FALSE, results = "asis"}
+answerlist(paste(unlist(explanations), ".", sep = ""), markup = "markdown")
+```
+
+
+Meta-information
+================
+extype: cloze
+exclozetype: `r paste(type, collapse = "|")`
+exsolution: `r paste(solutions, collapse = "|")`
+exname: Exam name
+exsection: Exam section
+extitle: Exam title
+extol: `r paste(tol, collapse = "|")`
+expoints: 10

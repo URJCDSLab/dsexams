@@ -1,0 +1,255 @@
+---
+title: "Intervalo de confianza y contraste de hipótesis con T-Student"
+author: "Emilio L. Cano"
+date: "2023-04-21"
+label: "inferencia_t"
+description: "En este ejercicio se proporcionan dos medias y dos desviaciones típicas, correspondientes a una característica de interés de dos tratamientos. Se deben responder preguntas sobre intervalos de confianza, tamaño muestral y contraste de hipótesis usando la distribución T-student."
+source: "Elaboración propia del autor de este ejercicio."
+source_doi: ""
+url: ""
+author_orcid: "0000-0002-6101-9755"
+language: "es"
+level: "exam"
+type: "cloze"
+domain:
+- generic
+lesson:
+- inferential statistics
+- hypothesis test
+- confidence interval
+keywords:
+- t student
+- confidence interval
+- hypothesis test
+- sample size
+
+version: 1
+---
+
+
+
+
+
+```{r data generation, echo = FALSE, results = "hide"}
+
+
+## Objects for solutions explanations, ...:
+questions <- solutions <- explanations <- type <- tol <- list()
+
+## Checking validity
+valid <- FALSE
+while(!valid){
+
+  n1 <- sample(8:15, 1)
+  n2 <- sample(8:15, 1)
+  rm1 <- runif(1, 10, 200)
+  rm2 <- rm1 * sample(c(1.08, 1.15), 1) #+ rnorm(1)
+  rs1 <- runif(1, rm1*0.1, rm1*0.15)
+  rs2 <- (rs1/rm1)*rm2
+  x <- round(rnorm(n1, rm1, rs1), 1)
+  y <- round(rnorm(n2, rm2, rs2), 1)
+  alpha <- sample(c(0.1, 0.05, 0.01), 1)
+  m1 <- round(mean(x), 4)
+  m2 <- round(mean(y), 4)
+  s1 <- round(sd(x), 4)
+  s2 <- round(sd(y), 4)
+  resA <- t.test(x, conf.level = 1-alpha)
+  li <- round(resA$conf.int[1], 4)
+  ls <- round(resA$conf.int[2], 4)
+  tA <- round(qt(1 - alpha/2, df = n1 - 1), digits = 4)
+  e <- round(abs(diff(resA$conf.int)*(1/5)))
+  nopt <- ceiling(qnorm(1-alpha/2)^2*s1^2/e^2)
+  sp2 <- ((n1-1)*s1^2 + (n2-1)*s2^2)/(n1+n2-2)
+  res <- t.test(x, y, var.equal = TRUE, conf.level = 1-alpha, alternative = "greater")
+  tAB <- res$statistic
+  tAB2 <- (m1-m2)/(sqrt(sp2)*sqrt((1/n1+1/n2)))
+
+  if (nopt < n1){
+      valid <- FALSE
+  }
+
+  if (any(is.na(c(rs2,li,ls,res$statistic)))){
+    valid <- FALSE
+  }
+
+  valid <- TRUE
+  
+  
+  # round(tAB, 4) == round(tAB2, 4)
+  if(res$statistic < qt(alpha, n1+n2-2)){
+    rest <- "Se rechaza la hipótesis nula: el tratamiento B es mejor"
+    sol4 <- "10"
+  } else{
+    rest <- "No se rechaza la hipótesis nula: no hay evidencia suficiente para afirmar que el tratamiento B sea mejor"
+    sol4 <- "01"
+  }
+
+
+}
+
+
+# Pregunta 1 ----
+
+questions[[1]] <- ""
+solutions[[1]] <- li
+explanations[[1]] <- paste0("El intervalo de confianza para la media de la característica de interés con el tratamiento A es:", paste0("[", paste(resA$conf.int, collapse = "; "), "]"))
+type[[1]] <- "num"
+tol[[1]] <- "0.01"
+
+
+# Pregunta 2 ----
+
+questions[[2]] <- ""
+solutions[[2]] <- ls
+explanations[[2]] <- paste("El intervalo de confianza para la media de la característica de interés con el tratamiento A es:", paste0("[", paste(resA$conf.int, collapse = "; "), "]"))
+type[[2]] <- "num"
+tol[[2]] <- "0.01"
+
+
+# Pregunta 3 ----
+
+questions[[3]] <- ""
+solutions[[3]] <- nopt
+explanations[[3]] <- paste0("El tamaño de muestra si quisiéramos, para el mismo nivel de confianza, cometer un error inferior a ", e," unidades en la estimación anterior es de " ,nopt,".")
+type[[3]] <- "num"
+tol[[3]] <- "0"
+
+
+
+
+# pregunta 4 ----
+questions[[4]] <- c("Se rechaza la hipótesis nula: el tratamiento B es mejor",
+                    "No se rechaza la hipótesis nula: no hay evidencia suficiente para afirmar que el tratamiento B sea mejor")
+
+solutions[[4]] <- mchoice2string(c(ifelse(sol4 == "10", TRUE, FALSE),
+                                   ifelse(sol4 == "01",TRUE, FALSE)))
+
+
+explanations[[4]] <- c(rest,rest)
+
+
+type[[4]] <- "schoice"
+tol[[4]] <- "0"
+
+
+
+
+
+```
+
+
+Question
+========
+
+ En un experimento se quiere demostrar que el tratamiento B es mejor que el 
+tratamiento A en el valor de una determinada característica de interés que se
+quiere maximizar. Se selecciona una muestra aleatoria y se aplica, también aleatoriamente,
+el tratamiento A a `r n1` elementos y el tratamiento B a `r n2`
+elementos de la muestra. Se obtienen los siguientes estadísticos:
+
+
+$$\bar x_A = `r m1`;\;  s_A = `r s1`$$
+
+$$\bar x_B = `r m2`;\;  s_B = `r s2`$$
+
+
+Se supone distribución normal y varianzas iguales pero desconocidas. Dispones además de los siguientes datos (tendrás que elegir el adecuado en cada caso, no se utilizan todos):
+
+$$z_{`r 1-alpha`} = `r round(qnorm(1-alpha), 4)`;\; z_{ `r 1-alpha/2`} = `r round(qnorm(1-alpha/2), 4)`$$
+
+
+$$t_{`r n1-1`; `r 1-alpha`} = `r round(qt(1-alpha, n1-1), 4)`;\; t_{`r n1`, `r 1-alpha`} = `r round(qt(1-alpha, n1), 4)`;\; t_{`r n1-1`; `r 1-alpha/2`} = `r round(qt(1-alpha/2, n1-1), 4)`;\; t_{`r n1`, `r 1-alpha/2`} = `r round(qt(1-alpha/2, n1), 4)`;\;$$
+
+
+
+$$t_{`r n1+n2-2`; `r 1-alpha`}=`r round(qt(1-alpha, n1+n2-2), 4)`;\; t_{`r n1+n2`; `r 1-alpha`}=`r round(qt(1-alpha, n1+n2), 4)`;\;t_{`r n1+n2-2`; `r 1-alpha/2`}=`r round(qt(1-alpha/2, n1+n2-2), 4)`;\; t_{`r n1+n2`; `r 1-alpha/2`}=`r round(qt(1-alpha/2, n1+n2), 4)`$$
+
+  Responda a las siguientes cuestiones sobre dichas variables aleatorias.
+  
+  
+  **IMPORTANTE:** en el examen habrá que justificar y razonar las respuestas, no basta con "acertar" en el resultado del contraste.
+
+ 
+  a.  Calcula el **límite inferior** del intervalo de confianza al `r 100*(1-alpha)`% para la característica de interés en el tratamiento A. 
+
+  ##ANSWER1##
+
+  b. Calcula el **límite superior** del intervalo de confianza al `r 100*(1-alpha)`% para la característica de interés en el tratamiento A. 
+  
+  ##ANSWER2##
+
+  c. ¿Cuál debería ser el **tamaño de muestra** si quisiéramos, para el mismo nivel de confianza, cometer un error inferior a `r e` unidades en la estimación anterior? 
+  
+  ##ANSWER3##
+
+  d. Realiza el **contraste de hipótesis** para evaluar si el tratamiento B es mejor que el tratamiento A y selecciona la respuesta verdadera:
+
+  ##ANSWER4##
+
+
+ 
+
+```{r questionlist, echo = FALSE, results = "asis"}
+answerlist(unlist(questions), markup = "markdown")
+```
+
+Solution
+========
+
+**Explicación general:**
+
+El intervalo de confianza al $`r 100 * (1 - alpha)`\%$ para la media de la 
+característica de interés $\mu$ viene dado por:
+
+$$
+\begin{aligned}
+& \left[\bar{x}_A \, - \, t_{n_{1}-1;`r 1-alpha/2`}\frac{s_{}}{\sqrt{n_{1}}}, \;
+\bar{x}_A \, + \, t_{n_{1}-1;`r 1-alpha/2`}\frac{s_{}^2}{\sqrt{n_{1}}}\right] \\
+&= \left[ `r m1` \, - \, `r tA`\frac{`r s1`}{\sqrt{`r n1`}}, \;
+`r m1` \, + \, `r tA`\frac{`r s1`}{\sqrt{`r n1`}}\right] \\
+&= \left[`r li`, \, `r ls`\right].
+\end{aligned}
+$$
+
+El tamaño de muestra para estimar la media de una población viene dado por:
+
+$$
+n = \frac{z_{\frac{\alpha}{2}}^2\cdot s^2}{e^2}
+$$
+
+El contraste de hipótesis que se plantea es:
+
+$H_0: \mu_A \geq \mu_B$
+$H_1: \mu_A < \mu_B$
+
+Si asumimos varianzas iguales, debemos calcular:
+
+$$s_p^2=\frac{(n_1 -1)s_1^2+(n_2-1)s_2^2 }{n_1+n_2 - 2} = `r round(sp2, 4)`$$
+El estadístico de contraste es:
+$$t_c = \frac{\bar x_1 - \bar x_2}{s_p \sqrt{\frac{1}{n_1}+\frac{1}{n_2}}} = `r round(tAB, 4)`$$
+Si $-t_c$ es menor que $-t_{n_1+n_2-2;  \alpha} = `r qt(alpha, n1+n2-2)`$, se rechaza la hipótesis
+nula para un nivel de significación de $`r alpha`$. 
+
+
+NOTA: usamos $\alpha$ y no $\alpha/2$ porque
+el contraste es unilateral.
+
+**Explicación específica:**
+
+```{r solutionlist, echo = FALSE, results = "asis"}
+answerlist(paste(unlist(explanations), ".", sep = ""), markup = "markdown")
+```
+
+
+
+Meta-information
+================
+extype: cloze
+exclozetype: `r paste(type, collapse = "|")`
+exsolution: `r paste(solutions, collapse = "|")`
+exname: inferencia t
+exsection: inferencia
+extitle: Ejercicio examen t
+extol: `r paste(tol, collapse = "|")`
+expoints: 10
+

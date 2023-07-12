@@ -1,0 +1,211 @@
+---
+title: "Matriz de covarianzas y regresión"
+author: "Antonio Alonso-Ayuso"
+date: "2023-04-29"
+label: "matrizcov"
+description: "En este ejercicio se proporcionan un conjunto de datos, las medias de sus variables y la matriz de varianzas covarianzas. Se hacen preguntas relativas al coeficiente de correlación, coeficiente de variación y la relación entre las variables de la tabla de datos."
+source: "Elaboración propia del autor de este ejercicio."
+source_doi: ""
+url: ""
+author_orcid: "0000-0002-6130-3596"
+language: "es"
+level: "exam"
+type: "cloze"
+domain: 
+  - generic
+lesson:
+- exploratory data analysis
+- descriptive statistics
+keywords: 
+- bivariate analysis
+- coefficient of variation
+- covariance
+
+version: 1
+---
+  
+  
+  
+```{r data generation, echo = FALSE, results = "hide"}
+library(exams)
+#options(OutDec = ",")
+## DATA GENERATION
+
+ok <- FALSE
+while(!ok) {
+  coin <- sample(c(1, -1), 1)
+  
+  X <- rnorm(100, runif(1,120, 180), 5)
+  Y <- -126 + 1.11*X + rnorm(100, sd = 2)
+  # Y <- sapply(X, function(x) rpois(1, round(x/2)))
+  df <- data.frame(X, Y)
+  
+  S <- round(cov(df), 6)
+  M <- round(colMeans(df), 2)
+  
+  sx <- sqrt(S[1,1])
+  sy <- sqrt(S[2,2])
+  
+  covxy <- S[1,2]
+  rho <- round(covxy/(sx*sy), 4)
+  
+  cvx <- round(sx/M[1],4)
+  cvy <- round(sy/M[2], 4)
+  
+  v <- ifelse(coin == 1, coin, 2)
+  v2 <- setdiff(1:2, v)
+  
+  
+  if (any(is.na(c(rho,S,M)))){
+    ok <- FALSE
+  }
+  
+  ok <- rho <=1 & rho >= -1
+  
+  
+  
+  
+}
+
+## QUESTION/ANSWER GENERATION
+
+questions <- solutions <- explanations <- tol <- type <- points <- list()
+
+npregunta <- 1
+
+
+# pregunta 1 ----
+questions[[npregunta]] <- ""
+solutions[[npregunta]] <- rho
+explanations[[npregunta]] <- rho
+type[[npregunta]] <- "num"
+tol[[npregunta]] <- "0.0001"
+points[[npregunta]] <- "2"
+npregunta <- npregunta + 1
+
+
+# Pregunta 2 ----
+questions[[npregunta]] <- c("Cuanto más mide una persona, más pesa",
+                            "Cuando menos mide una persona, más pesa",
+                            "Las variables X e Y son independientes, no hay relación entre el peso y la altura",
+                            "Existe relación positiva perfecta entre las variables",
+                            "Existe relación negativa perfecta entre las variables",
+                            "No hay relación lineal entre las variables X e Y")
+
+solutions[[npregunta]] <- mchoice2string(c(
+  ifelse(covxy > 0 & rho < 1, TRUE, FALSE),
+  ifelse(covxy < 0 & rho > -1, TRUE, FALSE),
+  FALSE,
+  ifelse(rho == 1, TRUE, FALSE),
+  ifelse(rho == -1, TRUE, FALSE),
+  ifelse(covxy == 0, TRUE, FALSE)))
+
+explanations[[npregunta]] <- c("Cuando la covarianza es positiva",
+                               "cuando la covarianza es negativa",
+                               "No se puede saber",
+                               "Cuando el coeficiente de correlación es 1",
+                               "Cuando el coeficiente de correlación es -1",
+                               "Cuando la covarianza es cero")  
+type[[npregunta]] <- "schoice"
+tol[[npregunta]] <- "0"
+points[[npregunta]] <- "1"
+npregunta <- npregunta + 1
+
+
+
+# Pregunta 3 ----
+questions[[npregunta]] <- ""
+solutions[[npregunta]] <- ifelse(v2 == 1, cvx, cvy)
+explanations[[npregunta]] <- ifelse(v2 == 1, cvx, cvy)
+type[[npregunta]] <- "num"
+tol[[npregunta]] <- "0.0001"
+points[[npregunta]] <- "1"
+
+
+```
+
+
+Question
+========
+  
+  
+En una determinada población se ha estudiado la relación entre las variables "X: Altura del sujeto" e
+"Y: Peso del sujeto". 
+Se ha obtenido una muestra de 100 sujetos, resultando el siguiente vector de medias $\boldsymbol{\overline X}$
+  y matriz de varianzas-covarianzas $\boldsymbol{S}$:
+  
+  $$
+  \begin{aligned}
+\boldsymbol{\overline X} = \left [\begin{array}{c} `r M[1]`\\
+                                  `r M[2]`\end{array}
+                                  \right ] ; \;\;
+\boldsymbol{S} = \left [\begin{array}{cc}
+                        `r S[1,1]` & `r S[1,2]`\\
+                        `r S[2,1]` & `r S[2,2]`
+                        \end{array}\right ]
+\end{aligned}
+$$
+  
+Responda a las siguientes cuestiones sobre dichas variables estadísticas. Utiliza todos los decimales posibles en los cálculos intermedios y da la solución con 4 decimales (tolerancia: $\pm$ 0.0001).
+
+a. Calcule el valor del coeficiente de correlación lineal entre el peso y la altura en esa población (2 puntos).
+##ANSWER1##
+
+b. Selecciona la afirmación más correcta (1 punto):
+  ##ANSWER2##
+  
+  c. Calcule el valor del coeficiente de variación de `r c("X", "Y")[v2]` (1 punto).
+##ANSWER3##
+
+
+```{r questionlist, echo = FALSE, results = "asis"}
+answerlist(unlist(questions), markup = "markdown")
+```
+
+
+Solution
+========
+  
+  
+  **Explicación general:**
+  
+  * La matriz de varianzas-covarianzas contiene en la diagonal las varianzas de las variables aleatorias, y fuera de la diagonal, las covarianzas:
+  
+  $$
+  \boldsymbol{S} = \left [\begin{array}{cc}
+                          S_x & S_{xy}\\
+                          S_{xy} & S_y
+                          \end{array}\right ].
+$$
+  
+  * El coeficiente de correlación lineal se calcula como:
+  
+  $$r = \frac{S_{xy}}{s_{x}s_{y}},$$
+  
+  por lo que todos los datos se encuentran en la matriz $\boldsymbol{S}$.
+
+* Si la covarianza es positiva, la relación es positiva, es decir, a más altura, más peso.
+Si es negativa, la relación es negativas, es decir, a menos altura, más peso
+
+* El coeficiente de variación es una medida relativa de la variabilidad que se calcula como cociente entre la
+desviación típica $s$ y la media de $\bar x$. Cuidado: para calcular la desviación típica, hay que hacer la raíz cuadrada de la varianza, dato que también tenemos en $\boldsymbol{S}$.
+
+
+**Explicación específica:**
+  
+```{r solutionlist, echo = FALSE, results = "asis"}
+answerlist(paste(unlist(explanations), ".", sep = ""), markup = "markdown")
+```
+
+
+Meta-information
+================
+extype: cloze
+exclozetype: `r paste(type, collapse = "|")`
+exsolution: `r paste(solutions, collapse = "|")`
+exname: ex_ord_grado_2020
+exsection: Matriz de Varianzas-Covarianzas (examen)
+extitle: Matriz de Varianzas-Covarianzas
+extol: `r paste(tol, collapse = "|")`
+expoints: `r paste(points, collapse = "|")`
+exversion: 0.1

@@ -1,0 +1,339 @@
+---
+title: "Matriz de covarianzas y regresión"
+author: "Emilio L. Cano"
+date: "2023-03-09"
+label: matrizcov
+description: En este ejercicio se proporciona un vector de medias y una matriz de
+  covarianzas y se deben responder algunas preguntas sobre la relación entre las variables,
+  así como calcular la recta de regresión, interpretar los resultados y realizar predicciones.
+source: Elaboración propia del autor de este ejercicio.
+source_doi: ''
+url: ''
+author_orcid: "0000-0002-6101-9755"
+language: es
+level: exam
+type: cloze
+domain: generic
+lesson:
+- exploratory data analysis
+- descriptive statistics
+keywords:
+- bivariate analysis
+- regression
+- covariance
+version: 2
+---
+
+
+
+
+# Instructions
+
+**IMPORTANT**: Delete this section when using the template.
+
+1. Change the metadata in the YAML header above. The categorization of each exercise is as follows:
+  - domain. One exercise must have at least one domain and could have more than one
+  - lesson. The typical lessons we have in data science. One exercise must have at least one lesson (tipycally only one, but can have more)
+  - keywords. One exercise can have as many keywords as needed. They can be both domain-specific keywords or data-science-related keywords. They will be used to generate a set of random exercices matching the keywords.
+  - type. The type of exercise (cloze for multiple questions)
+  - level. Level of difficulty (exam, advanced, intermediate, basic)
+  
+The rest of the fields are self-explanatory
+
+2. Generate random data for the exercise:
+
+  - Please consider if the random process might produce errors in the code, or impossible results, or any other issue in the exercise. In this case, change the condition in the `while` statement and within it in order to be sure that the exercise is valid. One thing can be always be assesed is that the objects used for computing the solution are not `NA`.
+  - Create the random data to be used in the solutions. It is in the chunk labelled `data generation` below. Important: keep the `echo` and `results` chunk options as they are. In this template there is just a toy example.
+  - Save the solution of each question in an object named `solutions`, and the explanations for each answer in an object named `explanations`. For _cloze_ exercises, they should be a list. Please note that the solutions must be in the appropriate format according to the type of question:
+      + Value for string or num questions
+      + Sequence of 0s and 1s in choice questions
+  - Save the tolerance and type of question
+  - Randomness can also be included in the exercise statements. For example, save three options in a vector, and then select the solutions, explanations, and statements according to the randomly selectied option.
+
+3. Write de Question statement. Please be sure that you keep the heading level under `Question` with `====` 
+
+4. Include `##ANSWERn##` wherever you want the input of the student for question `n`. A text box or select list will be shown in Moodle. IMPORTANT: keep the answerlist empty for this item.
+
+5. Write the answer list. This is what will be shown in the exercise for the student to fill out. One line per answer. For numeric and character questions, just an asterisk `*`. For simple choice or multiple choice questions, the choices.
+
+6. Write the solutions. Write arbitrary text and code for the explanations of the solution. Use the correct data according to the randomization, as well as the statements if they were also randomized. If the solution includes R output, set the `comment = NA` option in the chunk header.
+
+7. Write the meta information. If you follow the template, most of the data is generated automatically. The `exsection` field will be the one that will be shown in Moodle as category.
+
+NOTE: an example with several type of questions can be found [here](https://www.r-exams.org/templates/lm3/).
+
+  
+  
+```{r data generation, echo = FALSE, results = "hide"}
+## data-generating process: 
+## Two options: covariance zero or not zero
+## Then generate a normal distribution sample and a correlated Poisson distribution sample
+
+
+
+## Objects for solutions explanations, ...:
+questions <- solutions <- explanations <- type <- tol <- list()
+
+## Checking validity
+valid <- FALSE
+while(!valid){
+  ## code that generates data
+  coin <- sample(c(1, -1), 1)
+  
+  X <- rnorm(100, 120, 5)
+  Y <- sapply(X, function(x) rpois(1, round(x/2)))
+  df <- data.frame(X, Y)
+  
+  S <- round(cov(df), 2)
+  M <- round(colMeans(df), 2)
+  
+  sx <- sqrt(S[1,1])
+  sy <- sqrt(S[2,2])
+  
+  dice <- sample(1:6, 1)
+  if(dice == 1){
+    covxy <- 0
+  }else if (dice == 2){
+    covxy = sx*sy
+  } else{
+    covxy <- S[1,2]
+  }
+  
+  covxy <- covxy*coin
+  
+  S[1,2] <- covxy
+  S[2,1] <- covxy
+  
+  ## Objects for anwers
+  rho <- round(covxy/(sx*sy), 4)
+  
+  cvx <- round(sx/M[1],4)
+  cvy <- round(sy/M[2], 4)
+  
+  v <- ifelse(coin == 1, coin, 2)
+  v2 <- setdiff(1:2, v)
+  
+  b <- round(covxy/(sx^2), 4)
+  a <- M[2] - b*M[1]
+  R2 <- rho^2 
+  newx <- round(runif(1, min(X), max(X)), 1)
+  hatx <- unname(round(a + b*newx, 1))
+  
+
+  
+  ## assess here if the solution is valid
+  if(rho >= -1 & rho <= 1 & sx > 0.1 & sy > 0.1){
+    valid <- TRUE
+  }
+}
+
+# pregunta 1 ----
+questions[[1]] <- c("Las variables X e Y son independientes",
+                    "Las variables X e Y no son independientes",
+                    "Con la información proporcionada no se puede saber si las variables X e Y son independientes",
+                    "Ninguna es correcta")
+
+solutions[[1]] <- mchoice2string(c(FALSE,
+                    ifelse(covxy == 0, FALSE, TRUE),
+                    ifelse(covxy != 0, FALSE, TRUE),
+                    FALSE))
+  
+
+explanations[[1]] <- c("Solo con la covarianza no se puede determinar",
+                    ifelse(covxy == 0, "No hay dependencia lineal, pero puede habarla de otro tipo", 
+                           "Si fueran independientes, la vovariana sería cero, cosa que no sucede"),
+                    ifelse(covxy != 0, "Al ser la covarianza distinta de cero, sabemos que no son independientes", 
+                           "La covarianza igual a cero no implica independencia (lo contrario sí"),
+                    "Hay una correcta")
+
+type[[1]] <- "schoice"
+tol[[1]] <- "0"
+
+# Pregunta 2 ----
+
+questions[[2]] <- ""
+solutions[[2]] <- covxy
+explanations[[2]] <- "La covarianza es el valor que aparece fuera de la diagonal de la matriz"
+type[[2]] <- "num"
+tol[[2]] <- "0.1"
+
+# Pregunta 3 ----
+
+questions[[3]] <- ""
+solutions[[3]] <- rho
+explanations[[3]] <- "El coeficiente de correlación lineal se puede calcular como el cociente entre la covarianza y el producto de las desviaciones típicas, o como el coeficiente de regresión multiplicado por el cociente entre la desviación típica de la variable respuesta y la desviación típica de la variable explicativa"
+type[[3]] <- "num"
+tol[[3]] <- "0.0001"
+
+# Pregunta 4 ----
+
+questions[[4]] <-c("Cuando la variable X aumenta, la variable Y aumenta también",
+                    "Cuando la variable X aumenta, la variable Y disminuye",
+                    "Las variables X e Y son independientes, no hay relación entre ellas",
+                    "Existe relación positiva perfecta entre las variables",
+                    "Existe relación negativa perfecta entre las variables",
+                    "No hay relación lineal entre las variables X e Y")
+
+solutions[[4]] <-  mchoice2string(c(ifelse(covxy > 0, TRUE, FALSE),
+                    ifelse(covxy < 0, TRUE, FALSE),
+                    FALSE,
+                    ifelse(rho == 1, TRUE, FALSE),
+                    ifelse(rho == -1, TRUE, FALSE),
+                    ifelse(covxy == 0, TRUE, FALSE)))
+explanations[[4]] <- c("Cuando la covarianza es positiva",
+                    "cuando la covarianza es negativa",
+                    "No se puede saber",
+                    "Cuando el coeficiente de correlación es 1",
+                    "Cuando el coeficiente de correlación es -1",
+                    "Cuando la covarianza es cero")  
+type[[4]] <- "schoice"
+tol[[4]] <- "0"
+
+# Pregunta 5 ----
+
+questions[[5]] <- ""
+solutions[[5]] <- S[v,v]
+explanations[[5]] <- "Las varianzas se encuentran en la diagonal de la matriz de covarianzas"
+type[[5]] <- "num"
+tol[[5]] <- "0"
+
+
+# Pregunta 6 ----
+
+questions[[6]] <- ""
+solutions[[6]] <- ifelse(v2 == 1, cvx, cvy)
+explanations[[6]] <- "El coeficiente de variación es el cociente entre la desviación típica y la media"
+type[[6]] <- "num"
+tol[[6]] <- "0.0001"
+
+# Pregunta 7 ----
+
+questions[[7]] <- ""
+solutions[[7]] <- b
+explanations[[7]] <- "La pendiente de la recta de regresión se puede calcular como el cociente entre la covarianza y la varianza de la variable explicativa, o como el producto del coeficiente de regresión por el cociente entre la desviación típica de la variable independiente entre la desviación típica de la variable dependiente"
+type[[7]] <- "num"
+tol[[7]] <- "0.0001"
+
+# Pregunta 8 ----
+
+questions[[8]] <- ""
+solutions[[8]] <- hatx
+explanations[[8]] <- "Para hacer la predicción, se sustituye el valor de la variable independiente en la ecuación de la recta"
+type[[8]] <- "num"
+tol[[8]] <- "0.01"
+
+# Pregunta 9 ----
+
+questions[[9]] <- ""
+solutions[[9]] <- round(R2*100, 1)
+explanations[[9]] <- "El coeficiente de determinación $R^2$ es la proporción de variabilidad explicada por el modelo. Por tanto $R^2\\cdot 100$ es el porcentaje pedido. En el caso de la regresión lineal, $R^2 = r^2$"
+type[[9]] <- "num"
+tol[[9]] <- "0.01"
+
+``` 
+
+
+Question
+========
+
+Se han estudiado dos variables estadísticas $X$ e $Y$ en un determinado experimento.
+Dichas variables aleatorias quedan caracterizadas por el siguiente vector de medias $\boldsymbol{\overline X}$
+y matriz de varianzas-covarianzas $\boldsymbol{S}$:
+
+$$\begin{aligned}
+\boldsymbol{\bar X} = \left [\begin{array}{c} `r M[1]`\\
+                             `r M[2]`\end{array}
+                             \right ]\;\; ;
+\boldsymbol{S} = \left [\begin{array}{cc}
+                        `r S[1,1]` & `r S[1,2]`\\
+                        `r S[2,1]` & `r S[2,2]`
+                        \end{array}\right ]
+\end{aligned}$$
+
+Responda a las siguientes cuestiones sobre dichas variables aleatorias.
+
+a. ¿Cuál de las siguientes afirmaciones con respecto a la independencia de las variables $X$ e $Y$ es correcta?
+
+  ##ANSWER1##
+
+b. Indique el valor de la covarianza entre las variables $X$ e $Y$: ##ANSWER2##
+
+c. Calcule el valor del coeficiente de correlación lineal entre las variables $X$ e $Y$ (redondeado a 4 cifras decimales): ##ANSWER3##
+
+d. ¿Cuál de las siguientes opciones describe la relación entre las variables?
+
+  ##ANSWER4##
+
+
+e. Indique el valor de la varianza de la variable `r c("$X$", "$Y$")[v]`.
+
+##ANSWER5##
+
+f. Calcule el valor del coeficiente de variación de `r c("X", "Y")[v2]`, (redondeado a 4 cifras decimales):
+
+  ##ANSWER6##
+
+g. Calcule la recta de regresión de $Y$ sobre $X$. Introduzca el valor del coeficiente de regresión, es decir, la pendiente de la recta (redondeado a 4 cifras decimales).
+
+##ANSWER7##
+
+h. Haga una predicción de la variable $Y$ para un valor de la variable $X$ igual a `r newx` (redondeado a 1 cifra decimal).
+
+##ANSWER8##
+
+i. ¿Qué porcentaje de variabilidad de la variable $Y$ es explicado por la variable $X$ en este modelo? (redondeado a 1 cifra decimal)
+
+##ANSWER9##
+
+```{r questionlist, echo = FALSE, results = "asis"}
+answerlist(unlist(questions), markup = "markdown")
+```
+
+Solution
+========
+
+
+**Explicación general:**
+
+- Si la covarianza es cero, sabemos que no existe dependencia **lineal** entre las variables, pero esto no implica que sean independientes. Por tanto, nos faltaría información para afirmar una cosa u otra. Sin embargo, si es distinta de cero, no pueden ser independientes. Porque si son independientes, entonces la covarianza es cero necesariamente.
+
+- La matriz de varianzas-covarianzas contiene en la diagonal las varianzas de las variables aleatorias, y fuera de la diagonal, las covarianzas:
+
+$$\boldsymbol{S} = \left [\begin{array}{cc}
+s_x & s_{xy}\\
+s_{xy} & s_y
+\end{array}\right ].$$
+
+- El coeficiente de correlación lineal se calcula como:
+
+$$r = \frac{s_{xy}}{s_x s_y},$$
+
+por lo que todos los datos se encuentran en la matriz $\boldsymbol{S}$.
+
+- El coeficiente de variación es una medida relativa de la variabilidad que se calcula como cociente entre la
+desviación típica $s$ y la media de la variable $\bar x$. Cuidado: para calcular la desviación típica, hay que hacer la raíz cuadrada de la varianza, dato que también tenemos en $\boldsymbol{S}$.
+
+- Los coeficientes de la recta $y = a +bx$ se calculan como:
+
+$$b = \frac{s_{xy}}{s_x^2} = b ; a = \bar y - b\cdot \bar x$$
+
+- Para hacer una predicción, basta sustituir en la ecuación de la recta $x$ por su valor.
+
+- El coeficiente de determinación $R^2$ representa el porcentaje de variabilidad explicada. En el caso de la regresión lineal simple, es igual al coeficiente de correlación al cuadrado, $r^2$, multiplicado por 100 para expresarlo en forma de porcentaje.
+
+**Explicación específica:**
+
+```{r solutionlist, echo = FALSE, results = "asis"}
+answerlist(paste(unlist(explanations), ".", sep = ""), markup = "markdown")
+```
+
+Meta-information
+================
+extype: cloze
+exclozetype: `r paste(type, collapse = "|")`
+exsolution: `r paste(solutions, collapse = "|")`
+exname: matrizcov_name
+exsection: matrizcov
+extitle: Matriz de Varianzas-Covarianzas
+extol: `r paste(tol, collapse = "|")`
+expoints: 10

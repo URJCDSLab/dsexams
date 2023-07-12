@@ -1,0 +1,58 @@
+Package: dsexams
+Type: Package
+Title: Data-science based massive and automated generation of randomized multipurpose questionnaires
+Version: 0.1.1
+Authors@R: c(person("Emilio L.", "Cano", email = "emilio.lopez@urjc.es", 
+                  role = c("aut", "cre"),
+                  comment = c(ORCID = "0000-0002-6101-9755")),
+                  person("César", "Alfaro", email = "cesar.alfaro@urjc.es", 
+                  role = c("aut"),
+                  comment = c(ORCID = "0000-0002-9146-4067")),
+                  person("María Jesús", "Algar", email = "mariajesus.algar@urjc.es", 
+                  role = c("aut"),
+                  comment = c(ORCID = "0000-0002-7539-8522")), 
+                  person("Antonio", "Alonso-Ayuso", email = "antonio.alonso@urjc.es", 
+                  role = c("aut"),
+                  comment = c(ORCID = "0000-0002-6130-3596")), 
+                  person("Marina", "Cuesta", email = "marina.cuesta@urjc.es", 
+                  role = c("aut"),
+                  comment = c(ORCID = "0000-0002-1880-9225")), 
+                  person("Alberto", "Fernández-Isabel", email = "alberto.fernandez.isabel@urjc.es", 
+                  role = c("aut"),
+                  comment = c(ORCID = "0000-0002-0848-1190")), 
+                  person("Javier", "Gómez Miguel", email = "javier.gomez@urjc.es", 
+                  role = c("aut"),
+                  comment = c(ORCID = "0000-0001-6434-7263")), 
+                  person("Carmen", "Lancho", email = "carmen.lancho@urjc.es", 
+                  role = c("aut"),
+                  comment = c(ORCID = "0000-0002-4674-1598")), 
+                  person("Isaac", "Martín de Diego", email = "isaac.martin@urjc.es", 
+                  role = c("aut"),
+                  comment = c(ORCID = "0000-0001-5197-2932")), 
+                  person("Javier M.", "Moguerza", email = "javier.moguerza@urjc.es", 
+                  role = c("aut"),
+                  comment = c(ORCID = "0000-0003-1415-1961")), 
+                  person("Felipe", "Ortega", email = "felipe.ortega@urjc.es", 
+                  role = c("aut"),
+                  comment = c(ORCID = "0000-0003-0231-2051")), 
+                  person("Ángel", "Udías", email = "angelluis.udias@urjc.es", 
+                  role = c("aut"),
+                  comment = c(ORCID = "0000-0003-1219-0465"))
+                  )
+Maintainer: Emilio L. Cano <emilio.lopez@urjc.es>
+Description: {dsexams} creates questions to develop specialized exercise "templates".
+ It follows a data-science approach, both for the generation and for the teaching.
+ The templates are randomly generated including exercises, their solutions 
+ (using probability distributions to produce data or sampling for exercise options) 
+ and domain-specific feedback. {dsexams} is built upon the {exams} package and expanded
+ for generating specific content based on a data model and keywords.
+ This approach can be used to create Virtual Classroom quizzes to provide a stimulus to students who 
+ will never repeat exercises as in the hackneyed "problem sheets". Using the 
+ template, new questionaires can be used to increase the Data Science community question bank.
+License: GPL (>= 2)
+Encoding: UTF-8
+LazyData: true
+Depends: exams
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3

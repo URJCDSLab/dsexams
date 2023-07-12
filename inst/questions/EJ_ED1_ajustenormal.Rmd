@@ -1,0 +1,200 @@
+---
+title: "Ajuste a la normal"
+author: "Antonio Alonso-Ayuso"
+date: "2023-04-24"
+label: "ajuste_normal"
+description: "En este ejercicio se proporcionan estadísticos descriptivos y gráficos univariantes de tres variables aleatorias y se pregunta sobre su ajuste a la distrubución normal y la existencia de puntos atípicos"
+source: "Elaboración propia del autor de este ejercicio."
+source_doi: ""
+url: ""
+author_orcid: "0000-0002-6130-3596"
+language: "es"
+level: "basic"
+type: "mchoice"
+domain:
+  - generic
+lesson:
+  - exploratory data analysis
+  - descriptive statistics
+keywords:
+ - univariate analysis
+ - Normal distribution
+ - box-plot
+ - histogram
+ - qq-plot
+ - oulier data
+
+version: 1
+---
+
+
+
+```{r data generation, echo = FALSE, results = "hide"}
+
+
+## Objects for solutions explanations, ...:
+questions <- solutions <- explanations <- type <- tol <- list()
+
+
+## functions
+
+grafica <- function(x,nvar){
+  hist(x,proba=TRUE,main=paste("Histograma de ",nvar,sep=""))
+  lines(seq(min(x),max(x),le=500),dnorm(seq(min(x),max(x),le=500),mean=mean(x),sd=sd(x)),col="red")
+  boxplot(x, main=paste("Box-plot de ",nvar,sep=""))
+  qqnorm(x,main=paste("qq-plot de ",nvar,sep=""))
+  qqline(x)
+}
+
+
+seleccion <- function()
+{
+  nn1 <- sample(40:60,1)
+  nn2 <- nn-nn1
+  num <- 6
+  ok <- FALSE
+  while(!ok)
+  {
+    n <- runif(1)
+    if (n < 1/num)               x <- c(rnorm(nn1,mean=100, sd= 10), rnorm(nn2,mean=60, sd= 20))
+    if (1/num <= n && n < 2/num) x <- c(rnorm(nn,mean=sample(80:120,1), sd= sample(8:20,1)))
+    if (2/num <= n && n < 3/num) x <- c(runif(nn,sample(30:50,1),sample(80:100,1)))
+    if (3/num <= n && n < 4/num) x <- c(runif(nn1,sample(30:50,1),sample(80:100,1)),rnorm(nn2,mean=sample(50:60,1), sd= sample(8:20,1)))
+    if (4/num <= n && n < 5/num) x <- c(rexp(nn1,0.1/sample(40:70,1)),rnorm(nn2,mean=sample(50:60,1), sd= sample(8:20,1)))
+    if (5/num <= n && n < 6/num) x <- c(rnorm(nn,mean=sample(80:120,1), sd= sample(8:20,1)))
+    if (shapiro.test(x)$p <=0.0005){
+      ok <- TRUE
+      rep1 <- FALSE
+    }
+    else if (shapiro.test(x)$p >=0.30){
+      ok <- TRUE
+      rep1 <- TRUE
+    }
+  }
+  return(x)
+}
+
+
+
+
+## Checking validity
+valid <- FALSE
+while(!valid){
+
+  nn <- sample(80:120,1)
+  x <- seleccion()
+  resp1 <- ifelse(shapiro.test(x)$p <=0.0005,FALSE,TRUE)
+  y <- seleccion()
+  resp2 <- ifelse(shapiro.test(y)$p <=0.0005,FALSE,TRUE)
+  z <- seleccion()
+  resp3 <- ifelse(shapiro.test(z)$p <=0.0005,FALSE,TRUE)
+
+  bx <- boxplot(x, plot = FALSE)
+  by <- boxplot(y, plot = FALSE)
+  bz <- boxplot(z, plot = FALSE)
+
+  if (any(is.na(c(shapiro.test(x)$p,shapiro.test(y)$p,shapiro.test(z)$p,
+                  bx$out,by$out,bz$out)))){
+    valid <- FALSE
+  }
+
+    valid <- TRUE
+
+
+}
+
+
+
+# pregunta 1 ----
+questions[[1]] <- c("Las observaciones de la variable x se aproximan a una campana de Gauss.",
+                    "Las observaciones de la variable y se aproximan a una campana de Gauss.",
+                    "Las observaciones de la variable z se aproximan a una campana de Gauss.",
+                    "El conjunto de observaciones de la variable x tiene datos atípicos.",
+                    "El conjunto de observaciones de la variable y tiene datos atípicos.",
+                    "El conjunto de observaciones de la variable z tiene datos atípicos."
+                    )
+
+solutions[[1]] <- mchoice2string(c(resp1,
+                                 resp2,
+                                 resp3,
+                                 length(bx$out) > 0,
+                                 length(by$out) > 0,
+                                 length(bz$out) > 0
+                                 ))
+  
+
+explanations[[1]] <- c(ifelse(resp1, "Las gráficas muestran una distribución simétrica, con la media similar a la mediana", 
+                           "Los datos se alejan claramente de un patrón simétrico, unimodal y el qqplot no muestra una recta"),
+                       ifelse(resp2, "Las gráficas muestran una distribución simétrica, con la media similar a la mediana", 
+                           "Los datos se alejan claramente de un patrón simétrico, unimodal y el qqplot no muestra una recta"),
+                       ifelse(resp3, "Las gráficas muestran una distribución simétrica, con la media similar a la mediana", 
+                           "Los datos se alejan claramente de un patrón simétrico, unimodal y el qqplot no muestra una recta"),
+                       ifelse(length(bx$out) > 0, "El Box-plot muestra puntos atípicos", "El Box-plot no muestra ningún dato atípico"),
+                       ifelse(length(by$out) > 0, "El Box-plot muestra puntos atípicos", "El Box-plot no muestra ningún dato atípico"),
+                       ifelse(length(bz$out) > 0, "El Box-plot muestra puntos atípicos", "El Box-plot no muestra ningún dato atípico")
+)
+                       
+                       
+
+type[[1]] <- "mchoice"
+tol[[1]] <- "0"
+
+
+
+
+```
+
+
+
+
+Question
+========
+
+Se ha tomado una muestra de $`r nn`$ individuos a los que se les ha medido tres variables, $x$, $y$ y $z$. Se desea conocer si los datos se pueden ajustar a una campana de Gauss. para ello, se han calculado algunos estadísticos:
+
+
+```{r, echo=FALSE}
+summary(data.frame(x,y,z))
+```
+
+y los siguientes gráficos:
+
+```{r, echo=FALSE,  fig=TRUE, fig.width=15, fig.height=15, fig.cap=""}
+par(mfrow=c(3,3))
+grafica(x,"x")
+grafica(y,"y")
+grafica(z,"z")
+```
+
+
+¿Cuál de las afirmaciones preguntas es correcta (puede haber más de una)?
+
+
+
+```{r questionlist, echo = FALSE, results = "asis"}
+answerlist(unlist(questions), markup = "markdown")
+```
+
+Solution
+========
+
+
+**Explicación específica:**
+
+```{r solutionlist, echo = FALSE, results = "asis"}
+answerlist(paste(unlist(explanations), ".", sep = ""), markup = "markdown")
+```
+
+
+
+
+Meta-information
+================
+extype: mchoice
+exclozetype: `r paste(type, collapse = "|")`
+exsolution: `r paste(solutions, collapse = "|")`
+exname: ED1_Ajuste a la normal
+exsection: Estadistica Descriptiva/Datos univariantes/1-ED1. Ajuste a la normal
+extitle: ED2_Ajuste_Normal
+extol: `r paste(tol, collapse = "|")`
+expoints: 10
