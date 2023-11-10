@@ -4,7 +4,7 @@ author: "Emilio L. Cano"
 date: "2023-03-09"
 label: matrizcov
 description: En este ejercicio se proporciona un vector de medias y una matriz de
-  covarianzas y se deben responder algunas preguntas sobre la relación entre las variables,
+  covarianzas de un problema concreto de videojuegos y se deben responder algunas preguntas sobre la relación entre las variables,
   así como calcular la recta de regresión, interpretar los resultados y realizar predicciones.
 source: Elaboración propia del autor de este ejercicio.
 source_doi: ''
@@ -13,7 +13,7 @@ author_orcid: "0000-0002-6101-9755"
 language: es
 level: exam
 type: cloze
-domain: generic
+domain: videogames
 lesson:
 - exploratory data analysis
 - descriptive statistics
@@ -69,7 +69,11 @@ NOTE: an example with several type of questions can be found [here](https://www.
 ## Two options: covariance zero or not zero
 ## Then generate a normal distribution sample and a correlated Poisson distribution sample
 
+## Function for formatting numbers
 
+fnum <- function(x, d = 2){
+  format(round(x, d), scientific = FALSE, big.mark = ".", decimal.mark = ",")
+}
 
 ## Objects for solutions explanations, ...:
 questions <- solutions <- explanations <- type <- tol <- list()
@@ -80,8 +84,11 @@ while(!valid){
   ## code that generates data
   coin <- sample(c(1, -1), 1)
   
-  X <- rnorm(100, 120, 5)
-  Y <- sapply(X, function(x) rpois(1, round(x/2)))
+  X <- round(rexp(100, 1/120), 3)
+  Y <- sapply(X, function(x){
+    # rpois(1, round((x + max(1, rnorm(1, sd = 10)))/2)) + rpois(100, 100)
+    rpois(1, round(x)) + sample(c(-1, 1), 1)*rpois(1, round(x)*0.4)
+  } )
   df <- data.frame(X, Y)
   
   S <- round(cov(df), 2)
@@ -100,6 +107,7 @@ while(!valid){
   }
   
   covxy <- covxy*coin
+  tipo_disparo <- ifelse(coin == 1, "realizado", "recibido")
   
   S[1,2] <- covxy
   S[2,1] <- covxy
@@ -113,24 +121,24 @@ while(!valid){
   v <- ifelse(coin == 1, coin, 2)
   v2 <- setdiff(1:2, v)
   
-  b <- round(covxy/(sx^2), 4)
-  a <- M[2] - b*M[1]
+  b <- round(covxy/(sy^2), 4)
+  a <- M[1] - b*M[2]
   R2 <- rho^2 
   newx <- round(runif(1, min(X), max(X)), 1)
-  hatx <- unname(round(a + b*newx, 1))
+  haty <- unname(round(a + b*newx, 0))
   
 
   
   ## assess here if the solution is valid
-  if(rho >= -1 & rho <= 1 & sx > 0.1 & sy > 0.1){
+  if(rho > -1 & rho <= 1 & sx > 0.1 & sy > 0.1 & haty > 1){
     valid <- TRUE
   }
 }
 
 # pregunta 1 ----
-questions[[1]] <- c("Las variables X e Y son independientes",
-                    "Las variables X e Y no son independientes",
-                    "Con la información proporcionada no se puede saber si las variables X e Y son independientes",
+questions[[1]] <- c("Las variables tiempo en la escena y número de disparos son independientes",
+                    "Las variables  tiempo en la escena y número de disparos no son independientes",
+                    "Con la información proporcionada no se puede saber si las variables  tiempo en la escena y número de disparos son independientes",
                     "Ninguna es correcta")
 
 solutions[[1]] <- mchoice2string(c(FALSE,
@@ -152,7 +160,7 @@ tol[[1]] <- "0"
 # Pregunta 2 ----
 
 questions[[2]] <- ""
-solutions[[2]] <- covxy
+solutions[[2]] <- round(covxy, 2)
 explanations[[2]] <- "La covarianza es el valor que aparece fuera de la diagonal de la matriz"
 type[[2]] <- "num"
 tol[[2]] <- "0.1"
@@ -167,12 +175,12 @@ tol[[3]] <- "0.0001"
 
 # Pregunta 4 ----
 
-questions[[4]] <-c("Cuando la variable X aumenta, la variable Y aumenta también pero la relación no es exacta",
-                    "Cuando la variable X aumenta, la variable Y disminuye pero la relación no es exacta",
-                    "Las variables X e Y son independientes, no hay relación entre ellas",
+questions[[4]] <-c("Cuando el tiempo en la escena aumenta, el número de disparos aumenta también, pero la relación no es exacta",
+                    "Cuando el tiempo en la escena aumenta, el número de disparos disminuye, pero la relación no es exacta",
+                    "Las variables tiempo en la escena y número de disparos son independientes, no hay relación entre ellas",
                     "Existe relación positiva exacta entre las variables",
                     "Existe relación negativa exacta entre las variables",
-                    "No hay relación lineal entre las variables X e Y")
+                    "No hay relación lineal entre las variables tiempo en la escena y número de disparos")
 
 solutions[[4]] <-  mchoice2string(c(ifelse(covxy > 0 & abs(rho) != 1, TRUE, FALSE),
                     ifelse(covxy < 0 & abs(rho) != 1, TRUE, FALSE),
@@ -217,10 +225,10 @@ tol[[7]] <- "0.0001"
 # Pregunta 8 ----
 
 questions[[8]] <- ""
-solutions[[8]] <- hatx
+solutions[[8]] <- haty
 explanations[[8]] <- "Para hacer la predicción, se sustituye el valor de la variable independiente en la ecuación de la recta"
 type[[8]] <- "num"
-tol[[8]] <- "0.01"
+tol[[8]] <- "0"
 
 # Pregunta 9 ----
 
@@ -236,29 +244,33 @@ tol[[9]] <- "0.01"
 Question
 ========
 
-Se han estudiado dos variables estadísticas $X$ e $Y$ en un determinado experimento.
-Dichas variables aleatorias quedan caracterizadas por el siguiente vector de medias $\boldsymbol{\overline X}$
-y matriz de varianzas-covarianzas $\boldsymbol{S}$:
+Se han estudiado los registros de un cierto número de partidas jugadas en un juego de acción on-line. En una determinada escena del juego, se miden el número de disparos `r tipo_disparo` $(X)$ y el tiempo que el jugador permanece en la escena, bien porque pasa a la siguiente escena o porque termina el juego, $(Y)$.
+Las variables aleatorias quedan caracterizadas por el siguiente vector de medias $\boldsymbol{\overline X}$
+y matriz de varianzas-covarianzas $\boldsymbol{\Sigma}$:
 
 $$\begin{aligned}
-\boldsymbol{\bar X} = \left [\begin{array}{c} `r M[1]`\\
+\boldsymbol{\bar X} = \left [\begin{array}{c} \bar X\\
+                             \bar Y\end{array}
+                             \right ]=
+                             \left [\begin{array}{c} `r M[1]`\\
                              `r M[2]`\end{array}
-                             \right ]\;\; ;
-\boldsymbol{S} = \left [\begin{array}{cc}
-                        `r S[1,1]` & `r S[1,2]`\\
-                        `r S[2,1]` & `r S[2,2]`
+                             \right ];
+                             \;\; 
+\boldsymbol{\Sigma} = \left [\begin{array}{cc}
+                        `r fnum(S[1,1])` & `r fnum(S[1,2])`\\
+                        `r fnum(S[2,1])` & `r fnum(S[2,2])`
                         \end{array}\right ]
 \end{aligned}$$
 
 Responda a las siguientes cuestiones sobre dichas variables aleatorias.
 
-a. ¿Cuál de las siguientes afirmaciones con respecto a la independencia de las variables $X$ e $Y$ es correcta?
+a. ¿Cuál de las siguientes afirmaciones con respecto a la independencia de las variables del juego es correcta?
 
   ##ANSWER1##
 
-b. Indique el valor de la covarianza entre las variables $X$ e $Y$: ##ANSWER2##
+b. Indique el valor de la covarianza entre los disparos `r tipo_disparo`s y el tiempo en la escena: ##ANSWER2##
 
-c. Calcule el valor del coeficiente de correlación lineal entre las variables $X$ e $Y$ (redondeado a 4 cifras decimales): ##ANSWER3##
+c. Calcule el valor del coeficiente de correlación lineal entre el número de disparos y el tiempo en la escena (redondeado a 4 cifras decimales): ##ANSWER3##
 
 d. ¿Cuál de las siguientes opciones describe la relación entre las variables?
 
@@ -269,19 +281,19 @@ e. Indique el valor de la varianza de la variable `r c("$X$", "$Y$")[v]`.
 
 ##ANSWER5##
 
-f. Calcule el valor del coeficiente de variación de `r c("X", "Y")[v2]`, (redondeado a 4 cifras decimales):
+f. Calcule el valor del coeficiente de variación de `r c("$X$", "$Y$")[v2]`, (redondeado a 4 cifras decimales):
 
   ##ANSWER6##
 
-g. Calcule la recta de regresión de $Y$ sobre $X$. Introduzca el valor del coeficiente de regresión, es decir, la pendiente de la recta (redondeado a 4 cifras decimales).
+g. Calcule la recta de regresión del número de disparos sobre el tiempo en el juego. Introduzca el valor del coeficiente de regresión, es decir, la pendiente de la recta (redondeado a 4 cifras decimales).
 
 ##ANSWER7##
 
-h. Haga una predicción de la variable $Y$ para un valor de la variable $X$ igual a `r newx` (redondeado a 1 cifra decimal).
+h. Haga una predicción del número de disparos para un valor del tiempo en el juego igual a `r newx` (redondeado a número entero).
 
 ##ANSWER8##
 
-i. ¿Qué porcentaje de variabilidad de la variable $Y$ es explicado por la variable $X$ en este modelo? (redondeado a 1 cifra decimal)
+i. ¿Qué porcentaje de variabilidad del número de disparos es explicada por el tiempo en el juego en este modelo? (redondeado a 1 cifra decimal). IMPORTANTE: introducir solo un número, por ejemplo 99.9, en ningún caso el símbolo de porcentaje.
 
 ##ANSWER9##
 
@@ -313,11 +325,11 @@ por lo que todos los datos se encuentran en la matriz $\boldsymbol{S}$.
 - El coeficiente de variación es una medida relativa de la variabilidad que se calcula como cociente entre la
 desviación típica $s$ y la media de la variable $\bar x$. Cuidado: para calcular la desviación típica, hay que hacer la raíz cuadrada de la varianza, dato que también tenemos en $\boldsymbol{S}$.
 
-- Los coeficientes de la recta $y = a +bx$ se calculan como:
+- Los coeficientes de la recta $x = a +by$ se calculan como:
 
-$$b = \frac{s_{xy}}{s_x^2} = b ; a = \bar y - b\cdot \bar x$$
+$$b = \frac{s_{xy}}{s_y^2} = b ; a = \bar x - b\cdot \bar y$$
 
-- Para hacer una predicción, basta sustituir en la ecuación de la recta $x$ por su valor.
+- Para hacer una predicción, basta sustituir en la ecuación de la recta $y$ por su valor.
 
 - El coeficiente de determinación $R^2$ representa el porcentaje de variabilidad explicada. En el caso de la regresión lineal simple, es igual al coeficiente de correlación al cuadrado, $r^2$, multiplicado por 100 para expresarlo en forma de porcentaje.
 
@@ -333,7 +345,7 @@ extype: cloze
 exclozetype: `r paste(type, collapse = "|")`
 exsolution: `r paste(solutions, collapse = "|")`
 exname: matrizcov_name
-exsection: matrizcov_autoevaluacion
-extitle: Matriz de Varianzas-Covarianzas
+exsection: matrizcov_examen
+extitle: Matriz de Varianzas-Covarianzas (videojuegos)
 extol: `r paste(tol, collapse = "|")`
 expoints: 10

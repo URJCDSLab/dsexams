@@ -167,15 +167,15 @@ tol[[3]] <- "0.0001"
 
 # Pregunta 4 ----
 
-questions[[4]] <-c("When variable X values increase, variable Y values also do",
-                   "When variable X values increase, variable Y values decrease",
+questions[[4]] <-c("When variable X values increase, variable Y values also do, but not exact relationship",
+                   "When variable X values increase, variable Y values decrease, but not exact relationship",
                    "Variables X and Y are independent, there is no relationship among them",
-                   "There is a perfect positive relationship among the variables",
-                   "There is a perfect negative relationship among the variables",
+                   "There is a exact positive relationship among the variables",
+                   "There is a exact negative relationship among the variables",
                    "There is no linear relationship between X and Y variables")
 
-solutions[[4]] <-  mchoice2string(c(ifelse(covxy > 0, TRUE, FALSE),
-                                    ifelse(covxy < 0, TRUE, FALSE),
+solutions[[4]] <-  mchoice2string(c(ifelse(covxy > 0 & abs(rho) != 1, TRUE, FALSE),
+                                    ifelse(covxy < 0 & abs(rho) != 1, TRUE, FALSE),
                                     FALSE,
                                     ifelse(rho == 1, TRUE, FALSE),
                                     ifelse(rho == -1, TRUE, FALSE),
@@ -303,8 +303,8 @@ Solution
 - The covariance matrix contains on the diagonal the variances of the random variables, and off the diagonal, the covariances:
 
   $$\boldsymbol{S} = \left [\begin{array}{cc}
-                            s_x & s_{xy}\\
-                            s_{xy} & s_y
+                            s_x^2 & s_{xy}\\
+                            s_{xy} & s_y^2
                             \end{array}\right ].$$
 
 - The linear correlation coefficient is calculated as follows:
@@ -317,7 +317,7 @@ so all the data are in the matrix $\boldsymbol{S}$.
 
 - The coefficients of the regression line $y = a +bx$ are computed as follows:
 
-$$b = \frac{s_{xy}}{s_x^2} = b ; a = \bar y - b\cdot \bar x$$
+$$b = \frac{s_{xy}}{s_x^2} = b ;\; a = \bar y - b\cdot \bar x$$
 
 - To make a prediction, it is enough to substitute in the equation of the straight line $x$ for its value.
 
