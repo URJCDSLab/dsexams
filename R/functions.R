@@ -171,7 +171,7 @@ generate_exam <- function(qpath, n_questions, n = 1, edir = ".", ename = NULL,
     result <- subset(result, grepl(paste(i.lesson, collapse = "|"), lesson))
   }
 
-  print(nrow(result))
+  # print(nrow(result))
 
   if (nrow(result) == 0){
     warning("No questions matched the search criteria")
