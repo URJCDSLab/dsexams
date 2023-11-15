@@ -67,3 +67,35 @@ test_that("silent_matcov_wordcloud", {
   matcov_wordcloud <- word_cloud("matrizcov_en.Rmd")
   expect_silent(matcov_wordcloud)
 })
+
+## Generate_exam ----
+
+# Evaluates if an exam file is created in a temporal folder
+test_that("file_created_generate_exam", {
+  testFolder <- tempdir()
+  generate_exam(
+    qpath="inst/questions/",
+    nquest = 1,
+    edir = testFolder,
+    ename = "dsexams_Exam",
+    output_format = "moodle"
+  )
+  exam_files <- list.files(path = testFolder, pattern = "^dsexams_Exam")
+  exists_exam <- any(file.exists(path = testFolder, exam_files))
+  expect_true(exists_exam)
+})
+
+
+# Evaluates if the result is a dataframe (s3 class).
+test_that("expect_s3_class_generate_exam", {
+  testFolder <- tempdir()
+  exam_type <- generate_exam(
+    qpath="inst/questions/",
+    nquest = 1,
+    edir = testFolder,
+    ename = "dsexams_Exam",
+    output_format = "moodle"
+  )
+  expect_s3_class(exam_type, "data.frame")
+})
+

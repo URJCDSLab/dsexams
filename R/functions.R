@@ -117,28 +117,34 @@ questions <- function(quest){
 #'
 #' @param qpath A string with directory path, a vector of strings with path of
 #' exercises or a dataframe with metadata of exercises
-#' @param n An integer with the number of copies to be compiled from each execise
-#' @param n_questios An integer with the number of questions to be included in
-#' the exam
+#' @param nsamp The number(s) of exercise files sampled from each exercise file.
+#' @param nquest An integer representing the number of exercises from the
+#' dataframe used to generate the exam.
+#' @param n An integer with the number of different exams to be generated.
 #' @param edir A string specifying the path of the directory in which the exam
 #' file is stored
-#' @param ename A string with the name for the resulting exam file
+#' @param ename A string with the name prefix for the resulting exam file
+#' @param output_format A string with the format for the resulting exam file
+#' (moodle, pdf, html)
 #' @param i.language A string with the language code of the questions to be
 #' included in the exam
-#' @param i.level A string with the level of the questions to be included in
+#' @param i.level A string with the level of the exercises to be included in
 #' the exam
-#' @param i.type A string with the type of the questions to be included in
+#' @param i.type A string with the type of the exercises to be included in
 #' the exam
-#' @param i.domain A string with the domain of the questions to be included in
+#' @param i.domain A string with the domain of the exercises to be included in
 #' the exam
-#' @param i.keywords A vector of keywords. If a question contains any
-#' of the keywords in the vector, the question will be included in the exam
-#' @param i.lesson A vector of lessons. If a question contains any
-#' of the lessons in the vector, the question will be included in the exam
+#' @param i.keywords A vector of keywords. If a exercise contains any
+#' of the keywords in the vector, the exercises will be included in the exam
+#' @param i.lesson A vector of lessons. If a exercises contains any
+#' of the lessons in the vector, the exercises will be included in the exam
 #' @return A data frame with the exercises of exam
 #'
 #'@importFrom exams exams2moodle
-generate_exam <- function(qpath, n_questions, n = 1, edir = ".", ename = NULL,
+generate_exam <- function(qpath,
+                          nquest, nsamp = 1, n = 1,
+                          edir = ".", ename = NULL,
+                          output_format = "moodle",
                           i.language = NULL,
                           i.level = NULL,
                           i.type = NULL,
@@ -171,21 +177,39 @@ generate_exam <- function(qpath, n_questions, n = 1, edir = ".", ename = NULL,
     result <- subset(result, grepl(paste(i.lesson, collapse = "|"), lesson))
   }
 
-  print(nrow(result))
-
   if (nrow(result) == 0){
     warning("No questions matched the search criteria")
     return(NULL)
 
-  } else if (nrow(result) < n_questions){
+  } else if (nrow(result) < nquest){
     warning("The number of questions matching the search criteria is less than
-            the n_questions parameter.")
+            the nquest parameter.")
 
   } else {
-    result <- result[sample(nrow(result), n_questions),  ]
+    result <- result[sample(nrow(result), nquest),  ]
   }
 
-  exams::exams2moodle(file = unlist(result$file), n = n, dir=edir, name = ename)
+  switch(output_format,
+         "html" = exams::exams2html(
+           file = unlist(result$file),
+           n = n,
+           nsamp = nsamp,
+           dir=edir,
+           name = ename
+           ),
+         "moodle" = exams::exams2moodle(
+           file = unlist(result$file),
+           n = n,
+           nsamp = nsamp,
+           dir=edir,
+           name = ename),
+         "pdf" = exams::exams2pdf(
+           file = unlist(result$file),
+           n = n,
+           nsamp = nsamp,
+           dir=edir,
+           name = ename),
+         stop("Only html, pdf and moodle formats available."))
 
   return(result)
 
